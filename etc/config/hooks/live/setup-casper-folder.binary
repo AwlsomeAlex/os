@@ -1,10 +1,20 @@
 #!/bin/sh
 
+arch="$(uname -m)"
+
 mkdir casper || true
 mv boot/filesystem.squashfs casper/filesystem.squashfs
 mv boot/filesystem.size casper/filesystem.size
 mv boot/initrd.img-* casper/initrd.lz
 mv boot/vmlinuz-* casper/vmlinuz
+
+# linux-image has vmlinuz gunzipped by default. GRUB EFI has difficulty
+# reading this, so the vmlinuz proper is extracted
+if [ "$arch" = "aarch64" ]; then
+    mv casper/vmlinuz casper/vmlinuz.gz
+    gunzip casper/vmlinuz.gz
+fi
+
 mv boot/filesystem.packages-remove casper/filesystem.manifest-remove
 mv boot/filesystem.packages casper/filesystem.manifest
 

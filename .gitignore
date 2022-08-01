@@ -2,4 +2,5 @@
 tmp
 artifacts
 builds
+*.iso
 *~

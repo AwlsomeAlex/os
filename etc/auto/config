@@ -14,6 +14,18 @@ if [ "$HWE_X11" = "yes" ]; then
     XORG_HWE="xserver-xorg-hwe-${BASEVERSION}"
 fi
 
+case "$ARCH" in
+    amd64)
+        BOOT_IMAGE="--binary-images iso-hybrid --uefi-secure-boot enable"
+        MIRRORS_URL="mirror://mirrors.ubuntu.com/mirrors.txt"
+        ;;
+    arm64)
+        # live-build takes too long to find mirrors for ubuntu-ports
+        BOOT_IMAGE="--bootloaders grub-efi --uefi-secure-boot disable"
+        MIRRORS_URL="http://mirrors.mit.edu/ubuntu-ports/"
+        ;;
+esac
+
 lb config noauto \
     --architectures "$ARCH" \
     --mode ubuntu \
@@ -33,14 +45,13 @@ lb config noauto \
     --parent-mirror-chroot-security "http://security.ubuntu.com/ubuntu/" \
     --mirror-binary-security "http://security.ubuntu.com/ubuntu/" \
     --parent-mirror-binary-security "http://security.ubuntu.com/ubuntu/" \
-    --mirror-binary "mirror://mirrors.ubuntu.com/mirrors.txt" \
-    --parent-mirror-binary "mirror://mirrors.ubuntu.com/mirrors.txt" \
+    --mirror-binary "$MIRRORS_URL" \
+    --parent-mirror-binary "$MIRRORS_URL" \
     --keyring-packages ubuntu-keyring \
     --apt-options "--yes --option Acquire::Retries=2 --option Acquire::http::Timeout=45" \
     --cache-packages false \
     --cache-stages false \
-    --uefi-secure-boot enable \
-    --binary-images iso-hybrid \
+    $BOOT_IMAGE \
     --iso-application "$NAME" \
     --iso-volume "$NAME" \
     --firmware-binary false \
